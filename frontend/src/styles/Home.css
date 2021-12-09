@@ -1,0 +1,9 @@
+#background {
+  height: 100%;
+  width: 100%;
+  background-image: url("../assets/logo.png");
+  background-color: #121212;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}

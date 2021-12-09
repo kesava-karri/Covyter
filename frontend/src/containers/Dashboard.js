@@ -52,7 +52,7 @@ const tileStyle = {
 
 //socket.io
 // const socket = io("/");
-const socket = io("http://localhost:3001");
+const socket = io(process.env.HOST);
 
 //Dashboard component
 const Dashboard = (props) => {

@@ -1,9 +1,6 @@
-from tweepy.streaming import Stream
-from tweepy import OAuthHandler
-from tweepy import Stream, StreamListener
-from tweepy import API
 from unidecode import unidecode
 import tweepy
+from threading import Thread
 import json
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, g, flash
@@ -14,22 +11,26 @@ import urllib.parse
 import os
 import pymongo
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 port = int(os.getenv('PORT', 5000))
 
 # Connect to MongoDb atlas Database
 client = pymongo.MongoClient(
-    f"mongodb+srv://{os.getenv('MONGO_USERNAME')}:{os.getenv('MONGO_PASSWORD')}@cluster0.k6jrf.mongodb.net/sentiment?retryWrites=true&w=majority")
+    f"mongodb+srv://{os.getenv('MONGO_USERNAME')}:{os.getenv('MONGO_PASSWORD')}@cluster0.k6jrf.mongodb.net",
+    tlsCAFile=certifi.where())
 
 # Open an existing database
-db = client.sentiment.tweets
-db.create_index([("tweet_id", 1)], unique=True)
+_db = client["sentiment"]
+db = _db["tweets"]
+# db.create_index([("tweet_id", 1)], unique=True)
+print("here")
 
 app = Flask(__name__)
 
 
-class listener(StreamListener):
+class Listener(tweepy.Stream):
     def on_connect(self):
         # Called initially to connect to the Streaming API
         print("You are now connected to the streaming API.")
@@ -59,8 +60,8 @@ class listener(StreamListener):
             if address != None:
                 address = unidecode(address)
                 url = 'https://nominatim.openstreetmap.org/search/' + \
-                    urllib.parse.quote(address) + \
-                    '?format=json&limit=1'
+                      urllib.parse.quote(address) + \
+                      '?format=json&limit=1'
                 response = requests.get(url).json()
                 if len(response) > 0:
                     lati = response[0]["lat"]
@@ -85,6 +86,7 @@ class listener(StreamListener):
 
             # insert the data into the mongoDB into a collection called twitter_search
             db.insert_one(t)
+            del t
 
         except Exception as e:
             print("error: ", e)
@@ -96,12 +98,14 @@ def stream():
         csecret = os.getenv("CSECRET")
         atoken = os.getenv("ATOKEN")
         asecret = os.getenv("ASECRET")
-        auth = OAuthHandler(ckey, csecret)
-        auth.set_access_token(atoken, asecret)
-        twitterStream = Stream(auth=auth, listener=listener())
-        twitterStream.filter(track=['#boredspaces', '#AndJustLikeThat', '#covid19','#covidindia', '#covid_19india', '#covid19india', '#GCCCovid19SOS',
-                                    '#Covid19Chennai', '#covid19#india', '#IndiaFightsCOVID19', '#lockdownindia', '#Lockdown4', '#lockdown4guidelines', '#socialdistancingIndia', '#stayathomeindia',
-                                    '#StayHomeIndia', '#CoronaUpdatesInIndia'], is_async=True)
+        # auth = OAuthHandler(ckey, csecret)
+        # auth.set_access_token(atoken, asecret)
+        twitterStream = Listener(ckey, csecret, atoken, asecret)
+        twitterStream.filter(
+            track=['#boredspaces', '#AndJustLikeThat', '#covid19', '#covidindia', '#covid_19india', '#covid19india',
+                   '#GCCCovid19SOS', '#Covid19Chennai', '#covid19#india', '#IndiaFightsCOVID19', '#lockdownindia',
+                   '#Lockdown4', '#lockdown4guidelines', '#socialdistancingIndia', '#stayathomeindia', '#StayHomeIndia',
+                   '#CoronaUpdatesInIndia'])
     except Exception as e:
         print(str(e))
 
@@ -111,11 +115,7 @@ def home():
     return "Server is Running"
 
 
-@app.route('/start')
-def start():
-    stream()
-    return "streaming started"
-
-
 if __name__ == "__main__":
+    s = Thread(target=stream)
+    s.start()
     app.run(host="0.0.0.0", port=port)

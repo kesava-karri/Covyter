@@ -26,6 +26,7 @@ const Home = (props) => {
             Go to Dashboard
           </Button>
         </Grid>
+        <h2>Covyter</h2>
       </Grid>
     </div>
   );

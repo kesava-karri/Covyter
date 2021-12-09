@@ -34,7 +34,7 @@ const updater = async (io, interval) => {
   }
   const time_str = new Date()
     .toLocaleTimeString("en-US", {
-      timeZone: "Asia/Kolkata",
+      timeZone: "EST5EDT",
       hour12: false,
     })
     .slice(0, 5);

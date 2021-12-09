@@ -102,7 +102,7 @@ def stream():
         # auth.set_access_token(atoken, asecret)
         twitterStream = Listener(ckey, csecret, atoken, asecret)
         twitterStream.filter(
-            track=['#boredspaces', '#AndJustLikeThat', '#covid19', '#covidindia', '#covid_19india', '#covid19india',
+            track=['#covid', '#coronavirus', '#omicron','#Covid-19','#covid19', '#covidindia', '#covid_19india', '#covid19india',
                    '#GCCCovid19SOS', '#Covid19Chennai', '#covid19#india', '#IndiaFightsCOVID19', '#lockdownindia',
                    '#Lockdown4', '#lockdown4guidelines', '#socialdistancingIndia', '#stayathomeindia', '#StayHomeIndia',
                    '#CoronaUpdatesInIndia'])

@@ -47,7 +47,7 @@ Now, go to `localhost:3001` on your browser to start using the app
 
 ## Deployment
 
-The project is deployed on IBM Cloud Foundry. [Link](https://covid-19sentiment.eu-gb.cf.appdomain.cloud/)
+The project is deployed on DigitalOcean. [Link](http://143.198.112.181:3001/)
 
 ## Built With
 
